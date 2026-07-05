@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
-const USER_ID = "demo-user-123"; 
+const USER_ID = "demo-user-123";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const resumeRef = doc(db, "users", USER_ID, "resumes", params.id);
+    const { id } = await params;
+    const resumeRef = doc(db, "users", USER_ID, "resumes", id);
     const snapshot = await getDoc(resumeRef);
 
     if (!snapshot.exists()) {
@@ -25,11 +26,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
-    const resumeRef = doc(db, "users", USER_ID, "resumes", params.id);
+    const resumeRef = doc(db, "users", USER_ID, "resumes", id);
     
     await updateDoc(resumeRef, {
       ...body,
@@ -45,10 +47,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const resumeRef = doc(db, "users", USER_ID, "resumes", params.id);
+    const { id } = await params;
+    const resumeRef = doc(db, "users", USER_ID, "resumes", id);
     await deleteDoc(resumeRef);
     return NextResponse.json({ success: true });
   } catch (error) {

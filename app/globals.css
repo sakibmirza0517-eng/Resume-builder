@@ -2,19 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base styles */
+/* Global Styles */
 body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
 }
 
-/* Print styles */
+/* Print Styles - Ye PDF ke liye hai */
 @media print {
   @page {
     margin: 1.5cm;
     size: A4;
   }
 
+  /* Sab kuch hide karo except resume */
   body * {
     visibility: hidden;
   }
@@ -33,13 +34,38 @@ body {
     padding: 2cm;
     background: white !important;
     box-shadow: none !important;
+    border: none !important;
+    min-height: auto !important;
   }
 
+  /* Navbar, buttons, sab hide */
   .no-print {
     display: none !important;
   }
 
   body {
     background: white !important;
+  }
+
+  /* FIX FOR LIGHT TEXT IN PDF */
+  .resume-preview h1,
+  .resume-preview h2,
+  .resume-preview h3 {
+    color: #000000 !important; /* Pure black for headings */
+    font-weight: bold !important;
+  }
+
+  .resume-preview p,
+  .resume-preview span,
+  .resume-preview div {
+    color: #1f2937 !important; /* Dark gray (almost black) for body text */
+  }
+  
+  /* Force background colors for skills tags */
+  .resume-preview span.bg-blue-600 {
+    background-color: #2563eb !important;
+    color: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

@@ -70,6 +70,7 @@ function BuilderContent() {
 
   const [saving, setSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [skillsText, setSkillsText] = useState("");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -91,21 +92,21 @@ function BuilderContent() {
 
     try {
       const response = await fetch(`/api/resume/${resumeId}`);
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
         console.error("Failed to fetch resume:", errorData);
-        
+
         if (response.status === 404) {
           console.log("Resume not found, starting fresh");
           return;
         }
-        
+
         return;
       }
-      
+
       const data = await response.json();
-      
+
       setResumeData({
         title: data.title || "Untitled Resume",
         personalInfo: {
@@ -119,6 +120,9 @@ function BuilderContent() {
         experience: data.experience || [],
         skills: data.skills || [],
       });
+      
+      // FIX: Skills text ko yahan set karo
+      setSkillsText(data.skills?.join(", ") || "");
     } catch (error) {
       console.error("Error fetching resume:", error);
     }
@@ -150,58 +154,82 @@ function BuilderContent() {
     }
   };
 
+  // ULTIMATE AI ENHANCER
   const enhanceWithAI = async () => {
     setAiLoading(true);
     try {
-      const aiPrompt = `You are an expert resume writer with 10+ years of experience. Enhance the following resume data into a professional, ATS-friendly format.
+      const aiPrompt = `You are an elite Resume Writer, Career Coach, and ATS (Applicant Tracking System) Expert with 20+ years of experience. You have helped candidates get hired at FAANG and top-tier global companies.
 
-RESUME DATA TO ENHANCE:
+YOUR TASK: Analyze the provided resume data. If fields are empty, GENERATE highly professional content from scratch based on the context. If fields are filled, ENHANCE them to be world-class.
+
+RESUME DATA:
 ${JSON.stringify(resumeData, null, 2)}
 
-ENHANCEMENT INSTRUCTIONS:
-1. PROFESSIONAL SUMMARY: Write a compelling 2-3 line summary highlighting key strengths, experience, and career goals
-2. EXPERIENCE: Enhance each job description with:
-   - Action verbs (Led, Developed, Implemented, Optimized, Spearheaded, etc.)
-   - Quantifiable achievements (increased by X%, reduced by Y%, managed Z team members)
-   - Professional language and impact-focused statements
-   - Keep same structure (company, position, duration)
-3. EDUCATION: Keep degree, institution, year as is
-4. SKILLS: Keep as is (user provided their actual skills)
+ENHANCEMENT & GENERATION GUIDELINES:
 
-CRITICAL RULES:
-- DO NOT change: fullName, email, phone, location
-- DO NOT change: education degree, institution, year
-- DO NOT change: experience company, position, duration
-- ONLY enhance: summary, experience descriptions
-- Return ONLY valid JSON with exact same structure, no extra text
+1. RESUME TITLE:
+   - If the title is "Untitled Resume" or generic, generate a professional title based on the user's role (e.g., "Professional Software Engineer Resume", "Experienced Data Scientist CV").
 
-EXAMPLE RESPONSE FORMAT:
+2. PROFESSIONAL SUMMARY (Generate if empty, Enhance if filled):
+   - Write 3-4 powerful lines.
+   - Start with a strong professional title.
+   - Highlight core competencies, years of experience (or current status if a student), and career value proposition.
+   - Use power words: "Proven track record," "Expertise in," "Specialized in."
+
+3. EXPERIENCE DESCRIPTIONS (Generate if empty, Enhance if filled):
+   - For each position, write 3-4 impactful bullet points.
+   - Start EVERY point with a POWERFUL ACTION VERB:
+     * Leadership: Led, Spearheaded, Directed, Orchestrated, Mentored
+     * Technical: Developed, Engineered, Architected, Implemented, Automated, Optimized
+     * Impact: Increased, Reduced, Improved, Enhanced, Accelerated, Streamlined
+   - Use the STAR method (Situation → Task → Action → Result).
+   - Add QUANTIFIABLE METRICS (e.g., "Increased performance by 40%", "Reduced loading time by 2.5s").
+   - Include top technical keywords naturally.
+
+4. SKILLS ENHANCEMENT (CRITICAL):
+   - Analyze the user's role, experience, and education.
+   - Keep ALL the user's original skills.
+   - ADD missing, highly relevant industry-standard technical and soft skills for their specific role.
+   - Ensure the skills include top ATS keywords that recruiters search for.
+   - Format skills professionally (e.g., use "React.js" instead of "react").
+   - Return skills as a FLAT ARRAY OF STRINGS only.
+
+CRITICAL RULES (DO NOT BREAK):
+- DO NOT change: fullName, email, phone, location (keep exactly as is).
+- DO NOT change: education degree names, institution names, years.
+- DO NOT change: experience company names, position titles, duration.
+- ONLY generate/enhance: title, summary, experience descriptions, and SKILLS.
+- Maintain the exact same JSON structure.
+- Return ONLY valid JSON. No markdown, no explanations, no code blocks.
+
+RESPONSE FORMAT (MUST follow exactly):
 {
+  "title": "Generated Professional Title",
   "personalInfo": {
-    "fullName": "Keep same",
-    "email": "Keep same",
-    "phone": "Keep same",
-    "location": "Keep same",
-    "summary": "Results-driven professional with expertise in..."
+    "fullName": "EXACT SAME AS INPUT",
+    "email": "EXACT SAME AS INPUT",
+    "phone": "EXACT SAME AS INPUT",
+    "location": "EXACT SAME AS INPUT",
+    "summary": "Your enhanced or generated 3-4 line professional summary here"
   },
   "education": [
     {
-      "id": "keep-same-id",
-      "degree": "Keep same",
-      "institution": "Keep same",
-      "year": "Keep same"
+      "id": "same-id",
+      "degree": "SAME",
+      "institution": "SAME",
+      "year": "SAME"
     }
   ],
   "experience": [
     {
-      "id": "keep-same-id",
-      "company": "Keep same",
-      "position": "Keep same",
-      "duration": "Keep same",
-      "description": "Spearheaded development of..."
+      "id": "same-id",
+      "company": "SAME",
+      "position": "SAME",
+      "duration": "SAME",
+      "description": "• Led development of...\n• Implemented...\n• Achieved 40% improvement..."
     }
   ],
-  "skills": ["Keep same skills array"]
+  "skills": ["User's original skill", "AI added relevant skill 1", "AI added relevant skill 2"]
 }`;
 
       const response = await fetch("/api/generate", {
@@ -216,22 +244,24 @@ EXAMPLE RESPONSE FORMAT:
       }
 
       const data = await response.json();
-      
+
       if (data.result) {
         try {
           let cleanJson = data.result;
-          
+
           if (cleanJson.includes("```json")) {
             cleanJson = cleanJson.replace(/```json\n?/g, "").replace(/```\n?/g, "");
           }
           if (cleanJson.includes("```")) {
             cleanJson = cleanJson.replace(/```\n?/g, "");
           }
-          
+
           const enhancedData = JSON.parse(cleanJson);
+
+          const newSkills = enhancedData.skills || resumeData.skills;
           
           setResumeData({
-            title: resumeData.title,
+            title: enhancedData.title || resumeData.title,
             personalInfo: {
               fullName: enhancedData.personalInfo?.fullName || resumeData.personalInfo.fullName,
               email: enhancedData.personalInfo?.email || resumeData.personalInfo.email,
@@ -252,27 +282,17 @@ EXAMPLE RESPONSE FORMAT:
               duration: enhancedData.experience?.[index]?.duration || exp.duration,
               description: enhancedData.experience?.[index]?.description || exp.description,
             })),
-            skills: enhancedData.skills || resumeData.skills,
+            skills: newSkills,
           });
           
-          alert("✨ Resume enhanced successfully! AI has polished your entire resume.");
+          // FIX: AI enhance ke baad bhi skillsText update karo
+          setSkillsText(newSkills.join(", "));
+
+          alert("✨ Resume enhanced successfully! AI has optimized your content, added skills, and generated a professional title.");
         } catch (parseError) {
           console.error("JSON Parse Error:", parseError);
           console.error("AI Response was:", data.result);
-          
-          const summaryMatch = data.result.match(/summary["']?\s*:\s*["']([^"']+)["']/i);
-          if (summaryMatch) {
-            setResumeData({
-              ...resumeData,
-              personalInfo: {
-                ...resumeData.personalInfo,
-                summary: summaryMatch[1].substring(0, 300),
-              },
-            });
-            alert("⚠️ AI response format issue, but summary has been added.");
-          } else {
-            alert("❌ AI response could not be parsed. Please try again.");
-          }
+          alert("⚠️ AI response format issue. Please try again.");
         }
       } else {
         alert("❌ Failed to enhance resume. Please try again.");
@@ -337,7 +357,9 @@ EXAMPLE RESPONSE FORMAT:
     });
   };
 
+  // FIX: Updated updateSkills function
   const updateSkills = (value: string) => {
+    setSkillsText(value); // Textarea ko turant update karega
     setResumeData({
       ...resumeData,
       skills: value.split(",").map((s) => s.trim()).filter((s) => s),
@@ -579,15 +601,17 @@ EXAMPLE RESPONSE FORMAT:
             </div>
           </div>
 
+          {/* FIX: Skills section with skillsText state */}
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-lg">
             <h3 className="text-lg font-semibold mb-4 text-gray-900">Skills</h3>
             <textarea
-              placeholder="e.g., JavaScript, React, Node.js (comma separated)"
-              value={resumeData.skills?.join(", ") || ""}
+              placeholder="Type skills separated by commas (e.g., React, Node.js, Python)"
+              value={skillsText}
               onChange={(e) => updateSkills(e.target.value)}
               rows={2}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
+            <p className="text-xs text-gray-500 mt-2">💡 Tip: Har skill ke baad comma (,) zaroor lagayein.</p>
           </div>
         </div>
 
@@ -672,15 +696,17 @@ EXAMPLE RESPONSE FORMAT:
               </div>
             )}
 
-            {resumeData.skills?.length > 0 && (
+            {resumeData.skills && resumeData.skills.length > 0 && resumeData.skills.some(s => s && s.trim() !== "") && (
               <div>
                 <h2 className="text-xl font-bold text-gray-900 mb-4 uppercase tracking-wide border-b-2 border-gray-300 pb-2">Skills</h2>
                 <div className="flex flex-wrap gap-2">
-                  {resumeData.skills.map((skill, index) => (
-                    <span key={index} className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm">
-                      {skill}
-                    </span>
-                  ))}
+                  {resumeData.skills
+                    .filter(skill => skill && skill.trim() !== "")
+                    .map((skill, index) => (
+                      <span key={index} className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm">
+                        {skill}
+                      </span>
+                    ))}
                 </div>
               </div>
             )}

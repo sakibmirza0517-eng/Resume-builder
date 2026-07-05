@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Trash2, Save, Download, Sparkles, Loader2 } from "lucide-react";
@@ -34,7 +34,21 @@ interface ResumeData {
   skills: string[];
 }
 
+// Wrapper component with Suspense
 export default function BuilderPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-600 to-blue-600">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      </div>
+    }>
+      <BuilderContent />
+    </Suspense>
+  );
+}
+
+// Actual content component
+function BuilderContent() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -69,7 +83,6 @@ export default function BuilderPage() {
     }
   }, [resumeId, user]);
 
-  // FIXED: Better error handling for fetch
   const fetchResume = async () => {
     if (!resumeId) {
       console.log("No resume ID - creating new resume");

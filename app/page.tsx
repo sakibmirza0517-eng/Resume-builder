@@ -9,7 +9,7 @@ export default function Home() {
         
         {/* Badge */}
         <div className="inline-block px-4 py-1 bg-blue-50 text-blue-600 rounded-full text-xs sm:text-sm font-bold mb-4 md:mb-6 border border-blue-100">
-          ✨ Powered by Gemini AI
+          ✨ Resume Builder
         </div>
 
         {/* Main Heading - Mobile pe chhota, Desktop pe bada */}

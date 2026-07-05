@@ -3,7 +3,31 @@
 import { useEffect, useState, Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Trash2, Save, Download, Sparkles, Loader2, Github, Linkedin, Globe } from "lucide-react";
+import { Plus, Trash2, Save, Download, Sparkles, Loader2 } from "lucide-react";
+
+// Custom SVG Icons (lucide-react compatibility fix)
+const GithubIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+    <path d="M9 18c-4.51 2-5-2-7-2" />
+  </svg>
+);
+
+const LinkedinIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+    <rect width="4" height="12" x="2" y="9" />
+    <circle cx="4" cy="4" r="2" />
+  </svg>
+);
+
+const GlobeIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+    <path d="M2 12h20" />
+  </svg>
+);
 
 interface SocialLinks {
   linkedin: string;
@@ -285,15 +309,15 @@ RESPONSE FORMAT:
             <h3 className="text-lg font-semibold mb-4 text-gray-900">Social Links (IT Profile)</h3>
             <div className="space-y-4">
               <div className="flex items-center gap-3 border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
-                <Linkedin className="w-5 h-5 text-blue-600" />
+                <LinkedinIcon className="w-5 h-5 text-blue-600" />
                 <input type="text" placeholder="LinkedIn URL" value={resumeData.socialLinks?.linkedin || ""} onChange={(e) => setResumeData({ ...resumeData, socialLinks: { ...resumeData.socialLinks, linkedin: e.target.value } })} className="w-full outline-none bg-transparent" />
               </div>
               <div className="flex items-center gap-3 border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
-                <Github className="w-5 h-5 text-gray-800" />
+                <GithubIcon className="w-5 h-5 text-gray-800" />
                 <input type="text" placeholder="GitHub URL" value={resumeData.socialLinks?.github || ""} onChange={(e) => setResumeData({ ...resumeData, socialLinks: { ...resumeData.socialLinks, github: e.target.value } })} className="w-full outline-none bg-transparent" />
               </div>
               <div className="flex items-center gap-3 border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
-                <Globe className="w-5 h-5 text-green-600" />
+                <GlobeIcon className="w-5 h-5 text-green-600" />
                 <input type="text" placeholder="Portfolio/Website URL" value={resumeData.socialLinks?.portfolio || ""} onChange={(e) => setResumeData({ ...resumeData, socialLinks: { ...resumeData.socialLinks, portfolio: e.target.value } })} className="w-full outline-none bg-transparent" />
               </div>
             </div>
@@ -374,9 +398,9 @@ RESPONSE FORMAT:
                 {resumeData.personalInfo?.location && <span className="flex items-center gap-1">📍 {resumeData.personalInfo.location}</span>}
               </div>
               <div className="flex flex-wrap gap-4 text-sm text-blue-700 font-medium">
-                {resumeData.socialLinks?.linkedin && <a href={resumeData.socialLinks.linkedin} target="_blank" className="flex items-center gap-1 hover:underline"><Linkedin className="w-4 h-4" /> LinkedIn</a>}
-                {resumeData.socialLinks?.github && <a href={resumeData.socialLinks.github} target="_blank" className="flex items-center gap-1 hover:underline"><Github className="w-4 h-4" /> GitHub</a>}
-                {resumeData.socialLinks?.portfolio && <a href={resumeData.socialLinks.portfolio} target="_blank" className="flex items-center gap-1 hover:underline"><Globe className="w-4 h-4" /> Portfolio</a>}
+                {resumeData.socialLinks?.linkedin && <a href={resumeData.socialLinks.linkedin} target="_blank" className="flex items-center gap-1 hover:underline"><LinkedinIcon className="w-4 h-4" /> LinkedIn</a>}
+                {resumeData.socialLinks?.github && <a href={resumeData.socialLinks.github} target="_blank" className="flex items-center gap-1 hover:underline"><GithubIcon className="w-4 h-4" /> GitHub</a>}
+                {resumeData.socialLinks?.portfolio && <a href={resumeData.socialLinks.portfolio} target="_blank" className="flex items-center gap-1 hover:underline"><GlobeIcon className="w-4 h-4" /> Portfolio</a>}
               </div>
             </div>
 
@@ -395,7 +419,7 @@ RESPONSE FORMAT:
                     <div key={proj.id}>
                       <div className="flex justify-between items-start mb-1">
                         <h3 className="font-bold text-gray-900 text-lg">{proj.name}</h3>
-                        {proj.link && <a href={proj.link} target="_blank" className="text-blue-600 text-sm hover:underline flex items-center gap-1"><Globe className="w-3 h-3" /> View</a>}
+                        {proj.link && <a href={proj.link} target="_blank" className="text-blue-600 text-sm hover:underline flex items-center gap-1"><GlobeIcon className="w-3 h-3" /> View</a>}
                       </div>
                       <p className="text-blue-700 text-sm font-medium mb-1 italic">{proj.techStack}</p>
                       {proj.description && <p className="text-gray-700 leading-relaxed whitespace-pre-line">{proj.description}</p>}
